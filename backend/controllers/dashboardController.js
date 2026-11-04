@@ -12,20 +12,33 @@ const getDashboardStats = async (req, res, next) => {
 
     const totalApplications = applications.length;
 
-    // Counts by status
+    // 7 Distinct Status Counts
     const statusCounts = {
       Applied: 0,
       'Online Test': 0,
-      Interview: 0,
+      'Technical Interview': 0,
+      'HR Interview': 0,
       Offer: 0,
       Rejected: 0,
+      'On Hold': 0,
     };
 
     applications.forEach((app) => {
-      if (statusCounts[app.status] !== undefined) {
-        statusCounts[app.status] += 1;
+      let st = app.status;
+      if (st === 'Interview') st = 'Technical Interview'; // Legacy compatibility
+
+      if (statusCounts[st] !== undefined) {
+        statusCounts[st] += 1;
       }
     });
+
+    const totalInterviews = statusCounts['Technical Interview'] + statusCounts['HR Interview'];
+    const activeApplications =
+      statusCounts.Applied +
+      statusCounts['Online Test'] +
+      statusCounts['Technical Interview'] +
+      statusCounts['HR Interview'] +
+      statusCounts['On Hold'];
 
     // Placement Success Rates
     const offerRate = totalApplications > 0
@@ -33,23 +46,21 @@ const getDashboardStats = async (req, res, next) => {
       : 0;
 
     const interviewRate = totalApplications > 0
-      ? Number((((statusCounts.Interview + statusCounts.Offer) / totalApplications) * 100).toFixed(1))
+      ? Number((((totalInterviews + statusCounts.Offer) / totalApplications) * 100).toFixed(1))
       : 0;
-
-    const activeApplications =
-      statusCounts.Applied + statusCounts['Online Test'] + statusCounts.Interview;
 
     // Data formatted for Recharts Pie Chart
     const statusDistribution = [
       { name: 'Applied', value: statusCounts.Applied, color: '#3B82F6' },
       { name: 'Online Test', value: statusCounts['Online Test'], color: '#F59E0B' },
-      { name: 'Interview', value: statusCounts.Interview, color: '#8B5CF6' },
+      { name: 'Technical Interview', value: statusCounts['Technical Interview'], color: '#8B5CF6' },
+      { name: 'HR Interview', value: statusCounts['HR Interview'], color: '#A855F7' },
       { name: 'Offer', value: statusCounts.Offer, color: '#10B981' },
       { name: 'Rejected', value: statusCounts.Rejected, color: '#EF4444' },
+      { name: 'On Hold', value: statusCounts['On Hold'], color: '#64748B' },
     ];
 
     // Data formatted for Recharts Monthly Applications Bar Chart
-    // Aggregate by month for the last 6 months
     const monthlyMap = {};
     const monthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
@@ -61,7 +72,6 @@ const getDashboardStats = async (req, res, next) => {
       monthlyMap[key] = { month: key, applications: 0, offers: 0 };
     }
 
-    // Populate counts
     applications.forEach((app) => {
       const appDate = new Date(app.dateApplied || app.createdAt);
       const key = `${monthsName[appDate.getMonth()]} ${appDate.getFullYear().toString().slice(-2)}`;
@@ -79,12 +89,15 @@ const getDashboardStats = async (req, res, next) => {
       success: true,
       stats: {
         totalApplications,
+        activeApplications,
         applied: statusCounts.Applied,
         onlineTests: statusCounts['Online Test'],
-        interviews: statusCounts.Interview,
+        technicalInterviews: statusCounts['Technical Interview'],
+        hrInterviews: statusCounts['HR Interview'],
+        interviews: totalInterviews,
         offers: statusCounts.Offer,
         rejected: statusCounts.Rejected,
-        activeApplications,
+        onHold: statusCounts['On Hold'],
         offerRate,
         interviewRate,
       },
@@ -125,7 +138,6 @@ const getUpcomingInterviews = async (req, res, next) => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // Fetch applications where interviewDate is defined, >= startOfToday, and not rejected
     const upcoming = await Application.find({
       userId,
       interviewDate: { $gte: startOfToday },
@@ -143,12 +155,14 @@ const getUpcomingInterviews = async (req, res, next) => {
         jobRole: app.jobRole,
         interviewDate: app.interviewDate,
         interviewTime: app.interviewTime || 'TBD',
+        interviewType: app.interviewType || 'Online / Video Call',
         location: app.location,
         applicationLink: app.applicationLink,
+        companyWebsite: app.companyWebsite,
         status: app.status,
         notes: app.notes,
         daysRemaining,
-        isUrgent: daysRemaining <= 7, // Flag for next 7 days alert
+        isUrgent: daysRemaining <= 7,
       };
     });
 

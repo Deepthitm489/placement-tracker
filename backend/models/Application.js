@@ -1,5 +1,23 @@
 const mongoose = require('mongoose');
 
+const timelineItemSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      required: true,
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+    note: {
+      type: String,
+      default: '',
+    },
+  },
+  { _id: false }
+);
+
 const applicationSchema = new mongoose.Schema(
   {
     userId: {
@@ -25,10 +43,10 @@ const applicationSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
-    dateApplied: {
-      type: Date,
-      required: [true, 'Application date is required'],
-      default: Date.now,
+    companyWebsite: {
+      type: String,
+      trim: true,
+      default: '',
     },
     applicationLink: {
       type: String,
@@ -45,11 +63,26 @@ const applicationSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    dateApplied: {
+      type: Date,
+      required: [true, 'Application date is required'],
+      default: Date.now,
+    },
     status: {
       type: String,
       required: [true, 'Application status is required'],
       enum: {
-        values: ['Applied', 'Online Test', 'Interview', 'Offer', 'Rejected'],
+        values: [
+          'Applied',
+          'Online Test',
+          'Technical Interview',
+          'HR Interview',
+          'Offer',
+          'Rejected',
+          'On Hold',
+          // Allow legacy 'Interview' for backwards-compatibility
+          'Interview',
+        ],
         message: '{VALUE} is not a valid status',
       },
       default: 'Applied',
@@ -63,10 +96,21 @@ const applicationSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    interviewType: {
+      type: String,
+      enum: ['Online / Video Call', 'On-Campus', 'In-Person', 'Phone Screening', 'Not specified'],
+      default: 'Online / Video Call',
+    },
     notes: {
       type: String,
       trim: true,
       default: '',
+    },
+    activityTimeline: {
+      type: [timelineItemSchema],
+      default: function() {
+        return [{ status: this.status || 'Applied', date: this.dateApplied || new Date(), note: 'Application initial creation' }];
+      },
     },
   },
   {

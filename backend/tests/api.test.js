@@ -37,8 +37,16 @@ test('2. Authentication: JWT Token Generation and Verification', () => {
   assert.ok(decoded.exp > decoded.iat);
 });
 
-test('3. Application Model: Supported Status Validations', () => {
-  const validStatuses = ['Applied', 'Online Test', 'Interview', 'Offer', 'Rejected'];
+test('3. Application Model: Supported 7-Stage Status Validations', () => {
+  const validStatuses = [
+    'Applied',
+    'Online Test',
+    'Technical Interview',
+    'HR Interview',
+    'Offer',
+    'Rejected',
+    'On Hold',
+  ];
 
   validStatuses.forEach((status) => {
     const app = new Application({

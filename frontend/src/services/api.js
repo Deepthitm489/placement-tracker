@@ -25,9 +25,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If token expired, clear localStorage
       const currentPath = window.location.pathname;
-      if (currentPath !== '/login' && currentPath !== '/register') {
+      if (
+        currentPath !== '/' &&
+        currentPath !== '/login' &&
+        currentPath !== '/register' &&
+        currentPath !== '/forgot-password' &&
+        !currentPath.startsWith('/reset-password')
+      ) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login?expired=true';
@@ -43,6 +48,8 @@ export const authService = {
   login: (credentials) => api.post('/auth/login', credentials),
   getMe: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resetPassword: (token, data) => api.put(`/auth/reset-password/${token}`, data),
 };
 
 // ================= Application Services =================
@@ -60,6 +67,13 @@ export const dashboardService = {
   getStats: () => api.get('/dashboard/stats'),
   getRecent: () => api.get('/dashboard/recent'),
   getInterviews: () => api.get('/dashboard/interviews'),
+};
+
+// ================= Notification Services =================
+export const notificationService = {
+  getAll: () => api.get('/notifications'),
+  markRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllRead: () => api.put('/notifications/read-all'),
 };
 
 export default api;

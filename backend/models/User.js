@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,8 +34,15 @@ const userSchema = new mongoose.Schema(
     },
     branch: {
       type: String,
-      required: [true, 'Please enter your branch/major'],
+      required: [true, 'Please enter your branch or department'],
       trim: true,
+    },
+    department: {
+      type: String,
+      trim: true,
+      default: function() {
+        return this.branch;
+      },
     },
     graduationYear: {
       type: Number,
@@ -42,6 +50,8 @@ const userSchema = new mongoose.Schema(
       min: [2000, 'Graduation year must be 2000 or later'],
       max: [2040, 'Graduation year must be reasonable'],
     },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
   {
     timestamps: { createdAt: true, updatedAt: true },
@@ -63,14 +73,31 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Generate and hash password token
+userSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set expire (15 minutes)
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
+};
+
 // Remove sensitive fields from JSON representation
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
+  delete user.resetPasswordToken;
+  delete user.resetPasswordExpire;
   return user;
 };
-
-// Indexes: email unique constraint is configured in schema definition
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
   GraduationCap,
   Mail,
@@ -12,83 +15,77 @@ import {
   EyeOff,
   ArrowRight,
   AlertCircle,
+  Building,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    college: '',
-    branch: '',
-    graduationYear: new Date().getFullYear(),
+const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+    email: z.string().email('Please enter a valid email address'),
+    college: z.string().min(2, 'College name is required'),
+    branch: z.string().min(2, 'Department / Branch is required'),
+    graduationYear: z.coerce
+      .number()
+      .min(2020, 'Year must be 2020 or later')
+      .max(2035, 'Year must be realistic'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(6, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
+const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const { register } = useAuth();
+  const { register: authRegister } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      college: '',
+      branch: '',
+      graduationYear: new Date().getFullYear(),
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    // Validation
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword ||
-      !formData.college ||
-      !formData.branch ||
-      !formData.graduationYear
-    ) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
+  const onSubmit = async (data) => {
+    setServerError('');
     try {
-      setIsSubmitting(true);
-      await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        college: formData.college,
-        branch: formData.branch,
-        graduationYear: Number(formData.graduationYear),
+      setSubmitting(true);
+      await authRegister({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        college: data.college,
+        branch: data.branch,
+        department: data.branch,
+        graduationYear: data.graduationYear,
       });
       navigate('/dashboard');
     } catch (err) {
-      setError(
+      setServerError(
         err?.response?.data?.message ||
           err.message ||
           'Registration failed. Please check the details and try again.'
       );
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -103,7 +100,7 @@ const Register = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold tracking-tight text-white">Placement Tracker</h2>
-              <p className="text-xs text-brand-300 font-medium">Student Placement Portal</p>
+              <p className="text-xs text-brand-300 font-medium">Your Career Journey, Organized</p>
             </div>
           </div>
         </div>
@@ -113,21 +110,21 @@ const Register = () => {
             Your personal recruitment command center.
           </h1>
           <p className="text-slate-300 text-sm leading-relaxed">
-            Join thousands of university students organizing on-campus tests, technical rounds, salary offers, and company interview schedules in one unified platform.
+            Join university students organizing on-campus tests, technical rounds, salary offers, and company interview schedules in one unified platform.
           </p>
 
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 text-sm text-slate-200">
-              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
-              <span>100% private and dedicated student records</span>
+          <div className="space-y-3 pt-2 text-sm text-slate-200">
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
+              <span>100% private and individual student records</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-slate-200">
-              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
               <span>Real-time conversion & placement charts</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-slate-200">
-              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
-              <span>7-Day interview countdown radar</span>
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
+              <span>Installable PWA for Android & iPhone</span>
             </div>
           </div>
         </div>
@@ -144,20 +141,19 @@ const Register = () => {
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Create Student Account
             </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Set up your profile to start tracking your placements.
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Set up your academic profile to start tracking your placements.
             </p>
           </div>
 
-          {/* Error Alert */}
-          {error && (
-            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
-              <span>{error}</span>
+          {serverError && (
+            <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+              <span>{serverError}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
@@ -167,14 +163,12 @@ const Register = () => {
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  name="name"
-                  required
                   placeholder="e.g. Alex Johnson"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                  {...register('name')}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                 />
               </div>
+              {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name.message}</p>}
             </div>
 
             {/* Email */}
@@ -186,17 +180,15 @@ const Register = () => {
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
-                  name="email"
-                  required
                   placeholder="alex@university.edu"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                  {...register('email')}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                 />
               </div>
+              {errors.email && <p className="text-[11px] text-rose-500 mt-1">{errors.email.message}</p>}
             </div>
 
-            {/* College & Branch */}
+            {/* College & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
@@ -206,32 +198,28 @@ const Register = () => {
                   <School className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    name="college"
-                    required
                     placeholder="e.g. Stanford University"
-                    value={formData.college}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                    {...register('college')}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                   />
                 </div>
+                {errors.college && <p className="text-[11px] text-rose-500 mt-1">{errors.college.message}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                  Branch / Major *
+                  Department / Branch *
                 </label>
                 <div className="relative">
                   <BookOpen className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    name="branch"
-                    required
                     placeholder="e.g. Computer Science"
-                    value={formData.branch}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                    {...register('branch')}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                   />
                 </div>
+                {errors.branch && <p className="text-[11px] text-rose-500 mt-1">{errors.branch.message}</p>}
               </div>
             </div>
 
@@ -244,15 +232,15 @@ const Register = () => {
                 <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="number"
-                  name="graduationYear"
                   min="2020"
                   max="2035"
-                  required
-                  value={formData.graduationYear}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                  {...register('graduationYear')}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                 />
               </div>
+              {errors.graduationYear && (
+                <p className="text-[11px] text-rose-500 mt-1">{errors.graduationYear.message}</p>
+              )}
             </div>
 
             {/* Password & Confirm Password */}
@@ -265,21 +253,19 @@ const Register = () => {
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    required
                     placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                    {...register('password')}
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-[11px] text-rose-500 mt-1">{errors.password.message}</p>}
               </div>
 
               <div>
@@ -290,49 +276,43 @@ const Register = () => {
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    required
                     placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm shadow-xs"
+                    {...register('confirmPassword')}
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xs"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-[11px] text-rose-500 mt-1">{errors.confirmPassword.message}</p>
+                )}
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 active:bg-brand-800 shadow-md shadow-brand-600/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 active:bg-brand-800 shadow-md shadow-brand-600/30 transition-all disabled:opacity-50 cursor-pointer mt-2"
             >
-              {isSubmitting ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating Your Account...
-                </>
+              {submitting ? (
+                <span>Creating Your Account...</span>
               ) : (
                 <>
-                  <span>Complete Registration</span>
+                  <span>Create Account</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-center text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             Already registered?{' '}
-            <Link
-              to="/login"
-              className="font-semibold text-brand-600 dark:text-brand-400 hover:underline"
-            >
+            <Link to="/login" className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
               Sign in to your account
             </Link>
           </p>
