@@ -185,9 +185,12 @@ const InterviewsPage = () => {
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        <Link
+                          to={`/applications/${item._id}`}
+                          className="font-bold text-slate-900 dark:text-white text-base hover:text-brand-600 dark:hover:text-brand-400 block transition-colors"
+                        >
                           {item.companyName}
-                        </h3>
+                        </Link>
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           {item.jobRole}
                         </p>
@@ -291,6 +294,12 @@ const InterviewsPage = () => {
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
+                    <Link
+                      to={`/applications/${item._id}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:underline px-2 py-1 rounded-xl"
+                    >
+                      <span>Details</span>
+                    </Link>
                     <button
                       onClick={() => navigate(`/applications/edit/${item._id}`)}
                       className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline px-2 py-1 rounded-xl hover:bg-brand-50"

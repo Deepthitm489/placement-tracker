@@ -314,6 +314,154 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Change Password from Settings
+// @route   PUT /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both your current and new password.',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long.',
+      });
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New passwords do not match.',
+      });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found.',
+      });
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password does not match records.',
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully! You may use it on next login.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Export student's complete placement dataset (Settings)
+// @route   GET /api/auth/export-data
+// @access  Private
+const exportUserData = async (req, res, next) => {
+  try {
+    const Application = require('../models/Application');
+    const ActivityLog = require('../models/ActivityLog');
+    const Notification = require('../models/Notification');
+
+    const user = await User.findById(req.user._id);
+    const applications = await Application.find({ userId: req.user._id });
+    const activities = await ActivityLog.find({ userId: req.user._id });
+    const notifications = await Notification.find({ userId: req.user._id });
+
+    const archive = {
+      exportedAt: new Date().toISOString(),
+      studentProfile: {
+        name: user.name,
+        email: user.email,
+        college: user.college,
+        branch: user.branch,
+        department: user.department,
+        graduationYear: user.graduationYear,
+        registeredOn: user.createdAt,
+      },
+      summary: {
+        totalApplications: applications.length,
+        totalActivityEvents: activities.length,
+        totalNotifications: notifications.length,
+      },
+      applications,
+      activities,
+      notifications,
+    };
+
+    res.status(200).json({
+      success: true,
+      data: archive,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Permanently delete account and all linked records
+// @route   DELETE /api/auth/delete-account
+// @access  Private
+const deleteAccount = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your password to confirm account deletion.',
+      });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found.',
+      });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect password. Account deletion aborted.',
+      });
+    }
+
+    const Application = require('../models/Application');
+    const ActivityLog = require('../models/ActivityLog');
+    const Notification = require('../models/Notification');
+
+    // Cascade delete user data
+    await Application.deleteMany({ userId: req.user._id });
+    await ActivityLog.deleteMany({ userId: req.user._id });
+    await Notification.deleteMany({ userId: req.user._id });
+    await User.findByIdAndDelete(req.user._id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Account and all associated placement records have been permanently deleted.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -321,4 +469,7 @@ module.exports = {
   updateProfile,
   forgotPassword,
   resetPassword,
+  changePassword,
+  exportUserData,
+  deleteAccount,
 };

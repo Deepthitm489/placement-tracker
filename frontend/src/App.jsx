@@ -16,9 +16,11 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import ApplicationsList from './pages/ApplicationsList';
 import ApplicationForm from './pages/ApplicationForm';
+import ApplicationDetails from './pages/ApplicationDetails';
 import InterviewsPage from './pages/InterviewsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import NotFound from './pages/NotFound';
 
 // Home Router component: shows LandingPage if not logged in, or redirects to /dashboard if logged in
@@ -58,10 +60,12 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/applications" element={<ApplicationsList />} />
               <Route path="/applications/new" element={<ApplicationForm />} />
+              <Route path="/applications/:id" element={<ApplicationDetails />} />
               <Route path="/applications/edit/:id" element={<ApplicationForm />} />
               <Route path="/interviews" element={<InterviewsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
             {/* 404 Catch All */}

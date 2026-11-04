@@ -7,6 +7,7 @@ import {
   CalendarDays,
   BarChart3,
   UserCircle,
+  Settings,
   LogOut,
   GraduationCap,
   Sparkles,
@@ -21,6 +22,7 @@ const navigationItems = [
   { name: 'Interviews', path: '/interviews', icon: CalendarDays },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Profile', path: '/profile', icon: UserCircle },
+  { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

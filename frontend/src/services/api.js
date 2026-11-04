@@ -50,6 +50,9 @@ export const authService = {
   updateProfile: (data) => api.put('/auth/profile', data),
   forgotPassword: (data) => api.post('/auth/forgot-password', data),
   resetPassword: (token, data) => api.put(`/auth/reset-password/${token}`, data),
+  changePassword: (data) => api.put('/auth/change-password', data),
+  exportData: () => api.get('/auth/export-data'),
+  deleteAccount: (data) => api.delete('/auth/delete-account', { data }),
 };
 
 // ================= Application Services =================

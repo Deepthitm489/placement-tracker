@@ -613,9 +613,12 @@ const Dashboard = () => {
                     {recentApps.map((app) => (
                       <tr key={app._id} className="hover:bg-slate-50/60 dark:hover:bg-navy-800/40">
                         <td className="py-3">
-                          <div className="font-bold text-slate-900 dark:text-white">
+                          <Link
+                            to={`/applications/${app._id}`}
+                            className="font-bold text-slate-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 block transition-colors"
+                          >
                             {app.companyName}
-                          </div>
+                          </Link>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400">
                             {app.jobRole}
                           </div>
@@ -627,13 +630,13 @@ const Dashboard = () => {
                           <StatusBadge status={app.status} size="xs" />
                         </td>
                         <td className="py-3 text-right">
-                          <button
-                            onClick={() => navigate(`/applications/edit/${app._id}`)}
+                          <Link
+                            to={`/applications/${app._id}`}
                             className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline inline-flex items-center gap-1"
                           >
-                            <span>Edit</span>
+                            <span>View</span>
                             <ChevronRight className="w-3 h-3" />
-                          </button>
+                          </Link>
                         </td>
                       </tr>
                     ))}
