@@ -1,8 +1,23 @@
 import axios from 'axios';
 
+// Format and normalize base API URL
+const getBaseUrl = () => {
+  const configuredUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (!configuredUrl) {
+    return '/api';
+  }
+
+  let cleaned = configuredUrl.trim().replace(/\/+$/, '');
+  // If user provided origin like https://placement-tracker-backend.onrender.com without /api, append /api
+  if (!cleaned.endsWith('/api') && !cleaned.startsWith('/')) {
+    cleaned = `${cleaned}/api`;
+  }
+  return cleaned;
+};
+
 // Create Axios Instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
