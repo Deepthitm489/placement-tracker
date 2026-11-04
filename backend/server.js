@@ -124,6 +124,13 @@ const getHealthStatus = (req, res) => {
   const isConnecting = mongoose.connection.readyState === 2;
   const dbStatus = isConnected ? 'connected' : isConnecting ? 'connecting' : 'disconnected';
 
+  const rawUri = (process.env.MONGODB_URI || process.env.MONGO_URI || '').trim();
+  const isAtlasConfigured = Boolean(
+    rawUri &&
+    !rawUri.includes('127.0.0.1') &&
+    !rawUri.includes('localhost')
+  );
+
   res.status(200).json({
     status: 'healthy',
     message: 'Placement Tracker API is running smoothly',
@@ -132,7 +139,12 @@ const getHealthStatus = (req, res) => {
     database: {
       status: dbStatus,
       readyState: mongoose.connection.readyState,
-      configured: Boolean(process.env.MONGODB_URI || process.env.MONGO_URI),
+      atlasConfigured: isAtlasConfigured,
+      note: isConnected
+        ? 'MongoDB Atlas is connected and active'
+        : isAtlasConfigured
+        ? 'Connecting to MongoDB Atlas cluster...'
+        : 'Please set MONGODB_URI in Render service Environment variables with your MongoDB Atlas connection string',
     },
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
