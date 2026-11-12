@@ -28,7 +28,10 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error('Session verification failed:', error?.response?.data?.message || error.message);
-          logout();
+          // Only clear session if the server explicitly rejected the token (401/403)
+          if (error?.response?.status === 401 || error?.response?.status === 403) {
+            logout();
+          }
         }
       }
       setLoading(false);

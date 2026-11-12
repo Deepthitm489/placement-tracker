@@ -1,5 +1,5 @@
 // Placement Tracker PWA Service Worker
-const CACHE_NAME = 'placement-tracker-v1';
+const CACHE_NAME = 'placement-tracker-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -38,12 +38,16 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch: Network-first for dynamic navigation, cache-first for static assets
-// Strictly never cache private /api requests in public cache
+// Strictly never cache private /api requests, non-GET requests, or cross-origin API traffic
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   const url = new URL(event.request.url);
 
-  // Never cache API or auth endpoints
-  if (url.pathname.startsWith('/api')) {
+  // Never intercept cross-origin API requests (e.g. Render backend) or /api paths
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api')) {
     return;
   }
 

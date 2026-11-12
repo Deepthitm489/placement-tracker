@@ -154,11 +154,22 @@ const getHealthStatus = (req, res) => {
 app.get('/api/health', getHealthStatus);
 app.get('/health', getHealthStatus);
 
+// Fail fast with clear JSON error when database is unavailable
+const requireDB = (req, res, next) => {
+  if (process.env.NODE_ENV !== 'test' && mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection is unavailable. Please configure MONGODB_URI and ensure MongoDB Atlas Network Access allows 0.0.0.0/0.',
+    });
+  }
+  next();
+};
+
 // Mount Routers
-app.use('/api/auth', authRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/auth', requireDB, authRoutes);
+app.use('/api/applications', requireDB, applicationRoutes);
+app.use('/api/dashboard', requireDB, dashboardRoutes);
+app.use('/api/notifications', requireDB, notificationRoutes);
 
 // Root Welcome Endpoint
 app.get('/', (req, res) => {
