@@ -119,7 +119,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Health Check Endpoints (/api/health and /health)
-const getHealthStatus = (req, res) => {
+const getHealthStatus = async (req, res) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    // Ignore error here to report health status diagnostics
+  }
+
   const isConnected = mongoose.connection.readyState === 1;
   const isConnecting = mongoose.connection.readyState === 2;
   const dbStatus = isConnected ? 'connected' : isConnecting ? 'connecting' : 'disconnected';
@@ -144,7 +150,7 @@ const getHealthStatus = (req, res) => {
         ? 'MongoDB Atlas is connected and active'
         : isAtlasConfigured
         ? 'Connecting to MongoDB Atlas cluster...'
-        : 'Please set MONGODB_URI in Render service Environment variables with your MongoDB Atlas connection string',
+        : 'Please set MONGODB_URI in service environment variables with your MongoDB Atlas connection string',
     },
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
@@ -154,22 +160,25 @@ const getHealthStatus = (req, res) => {
 app.get('/api/health', getHealthStatus);
 app.get('/health', getHealthStatus);
 
-// Fail fast with clear JSON error when database is unavailable
-const requireDB = (req, res, next) => {
-  if (process.env.NODE_ENV !== 'test' && mongoose.connection.readyState !== 1) {
+// Ensure DB is connected before processing requests (Serverless and container resilient)
+const ensureDB = async (req, res, next) => {
+  if (process.env.NODE_ENV === 'test') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
     return res.status(503).json({
       success: false,
-      message: 'Database connection is unavailable. Please configure MONGODB_URI and ensure MongoDB Atlas Network Access allows 0.0.0.0/0.',
+      message: 'Database connection failed. Please ensure MongoDB Atlas cluster is online and MONGODB_URI is valid.',
     });
   }
-  next();
 };
 
 // Mount Routers
-app.use('/api/auth', requireDB, authRoutes);
-app.use('/api/applications', requireDB, applicationRoutes);
-app.use('/api/dashboard', requireDB, dashboardRoutes);
-app.use('/api/notifications', requireDB, notificationRoutes);
+app.use('/api/auth', ensureDB, authRoutes);
+app.use('/api/applications', ensureDB, applicationRoutes);
+app.use('/api/dashboard', ensureDB, dashboardRoutes);
+app.use('/api/notifications', ensureDB, notificationRoutes);
 
 // Root Welcome Endpoint
 app.get('/', (req, res) => {

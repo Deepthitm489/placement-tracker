@@ -4,11 +4,15 @@ import axios from 'axios';
 const getBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (!configuredUrl) {
+    // In production build, default directly to our live high-availability production backend
+    if (import.meta.env.PROD) {
+      return 'https://backend-nine-rho-32.vercel.app/api';
+    }
     return '/api';
   }
 
   let cleaned = configuredUrl.trim().replace(/\/+$/, '');
-  // If user provided origin like https://placement-tracker-backend.onrender.com without /api, append /api
+  // If user provided origin like https://backend-nine-rho-32.vercel.app without /api, append /api
   if (!cleaned.endsWith('/api') && !cleaned.startsWith('/')) {
     cleaned = `${cleaned}/api`;
   }

@@ -1,12 +1,15 @@
 {
+  "id": "/?source=pwa",
   "name": "Placement Tracker – Smart Student Placement System",
   "short_name": "PlacementTracker",
   "description": "Your Career Journey, Organized. Track recruitment pipelines, interview alerts, and job offers.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#4f46e5",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-192.png",
