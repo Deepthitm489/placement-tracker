@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://frontend-three-delta-91.vercel.app/sitemap.xml
