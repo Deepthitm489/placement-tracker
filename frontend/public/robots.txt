@@ -1,4 +1,36 @@
+# Robots.txt for Placement Tracker - Smart Student Placement Management System
+# Public website: https://frontend-three-delta-91.vercel.app
+
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /register
+Allow: /signup
+Allow: /forgot-password
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /applications/
+Disallow: /interviews
+Disallow: /analytics
+Disallow: /profile
+Disallow: /settings
+Disallow: /api/
 
+# Explicit instructions for Googlebot crawler
+User-agent: Googlebot
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /signup
+Allow: /forgot-password
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /applications/
+Disallow: /interviews
+Disallow: /analytics
+Disallow: /profile
+Disallow: /settings
+Disallow: /api/
+
+# Permanent Sitemap Index
 Sitemap: https://frontend-three-delta-91.vercel.app/sitemap.xml

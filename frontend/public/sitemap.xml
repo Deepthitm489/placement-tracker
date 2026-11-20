@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Public Landing Page -->
   <url>
     <loc>https://frontend-three-delta-91.vercel.app/</loc>
-    <lastmod>2026-11-14</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <!-- Public Student Login Page -->
   <url>
     <loc>https://frontend-three-delta-91.vercel.app/login</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- Public Student Registration Page -->
   <url>
-    <loc>https://frontend-three-delta-91.vercel.app/signup</loc>
-    <lastmod>2026-11-14</lastmod>
+    <loc>https://frontend-three-delta-91.vercel.app/register</loc>
+    <lastmod>2026-11-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <!-- Public Student Forgot Password Page -->
+  <url>
+    <loc>https://frontend-three-delta-91.vercel.app/forgot-password</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

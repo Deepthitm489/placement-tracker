@@ -148,18 +148,18 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/70 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs font-bold shadow-2xs">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Placement Tracker • Your Career Journey, Organized</span>
+            <span>Placement Tracker • Smart Student Placement Management System</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15] max-w-4xl mx-auto">
-            Organize campus applications, master interviews, and{' '}
+            Smart Student Placement Management &amp;{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-purple-600 to-indigo-500">
-              secure dream job offers.
+              Job Application Tracker
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Eliminate chaotic spreadsheets. Manage your end-to-end university recruitment pipeline with automated 7-day interview countdowns, 7 distinct progress stages, and real-time MongoDB analytics.
+            The premier all-in-one student placement management system and interview tracker. Organize campus recruitment drives, monitor technical rounds with automated 7-day countdowns, analyze CTC packages, and secure dream offers.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4">
@@ -292,10 +292,10 @@ const LandingPage = () => {
                 <Send className="w-6 h-6" />
               </div>
               <h4 className="text-lg font-bold text-slate-900 dark:text-white">
-                7-Stage Recruitment Tracker
+                Job Application Tracker &amp; Pipeline
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Track status across Applied, Online Test, Technical Interview, HR Interview, Offer, Rejected, and On Hold with automated timeline history.
+                Comprehensive job application tracker supporting 7 recruitment stages: Applied, Online Test, Technical Interview, HR Interview, Offer, Rejected, and On Hold with automated stage timelines.
               </p>
             </div>
 
@@ -305,10 +305,10 @@ const LandingPage = () => {
                 <Clock className="w-6 h-6" />
               </div>
               <h4 className="text-lg font-bold text-slate-900 dark:text-white">
-                7-Day Interview Radar
+                Smart Interview Tracker &amp; 7-Day Radar
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Smart countdown badges highlight upcoming technical, behavioral, and video rounds happening within 7 days so you never miss an interview.
+                Smart interview tracker with live countdown badges that highlight upcoming technical, behavioral, and screening rounds within 7 days so you never miss an interview.
               </p>
             </div>
 
@@ -318,7 +318,7 @@ const LandingPage = () => {
                 <BarChart3 className="w-6 h-6" />
               </div>
               <h4 className="text-lg font-bold text-slate-900 dark:text-white">
-                Dynamic Recharts Analytics
+                Student Placement Management Analytics
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 Interactive Pie distribution and Monthly application volume charts computed live from your MongoDB records with offer conversion rates.
